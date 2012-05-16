@@ -49,8 +49,8 @@ module Make = functor (Ev : K) ->  struct
   (* Vector Class {{{2 *)
   class vector ?data n = object(self)
     inherit matrix ~dims:(n,1) ?data () as super
-    method row n = super#get n 0
-    method rowset n = super#set n 0
+    method row n = super#get n 1
+    method rowset n = super#set n 1
     method norm () = sqrt (iterator n begin fun i sum -> 
      (Ev.norm2 (self#row i)) +. sum
     end 0.)
