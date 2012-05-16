@@ -129,7 +129,7 @@ $(EXEC).opt: $(OPTOBJS)
 	$(CAMLYACC) $<
 
 clean:
-	rm -f *.cm[iox] ui/*.cm[iox] *.annot .*~ .*~ #*#
+	rm -f *.cm[iox] ui/*.cm[iox] *.annot .*~ .*~ *.o #*#
 	rm -f $(EXEC)
 	rm -f $(EXEC).opt
 
