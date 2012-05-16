@@ -1,4 +1,5 @@
-
+open Log;;
+open Printf;;
 (* Quelques fonctions sur les complexes {{{1 *)
 let complex_of_float f = {
   Complex.re = f;
@@ -29,13 +30,21 @@ class register n = object
   val size = n
   val state = new vector (1 lsl n) (* Equivalent à 2^n *)
   method size () = size
+  (* normalize permet d'être sûr de bien avoir des probabilités *)
+  method normalize () = state#normalize ()
+  method setStateProbability s v = state#rowset s v
   (* Non destructif *)
   method getStateProbability s = 
-    if s >= state#rows () then raise (State_Does_Not_Exist "getStateProbability")
-    else state#row s
+    if s > state#rows () then raise (State_Does_Not_Exist "getStateProbability")
+    else state#row (s+1)
+  method dump () =
+    print "Le registre est dans l'état :\n";
+    for i = 1 to state#rows () do
+      printf "État %i de probabilité %f.\n" (i-1) (Complex.norm(state#row i));
+    done
   (* Destructif *)
   method measureState () =
-    (* On procède ainsi imaginons l'état suivant :
+    (* On procède ainsi, imaginons l'état suivant :
      *             00              01     10   11
      * |          0.5          |  0.25  | 0 | O.25 |
      * |  ------------ alea ------->|0.63  
@@ -58,7 +67,7 @@ class register n = object
       end else state#rowset i Complex.zero
     done;
     !stateMeasured
-end
+end;;
 (* }}} *)
 (*
 (* Circuit Class {{{1 *)
@@ -70,5 +79,13 @@ class circuit n = object
   (* Ajout d'une porte *)
   method add_gate (gate:gate) = gates = gate :: gates
 end
+(* }}} *)
+ *)
+(*
+(* TEST {{{1 *)
+let reg = new register 5 in
+Printf.printf "Size %i" (1 lsl 5);
+reg#dump ()
+
 (* }}} *)
  *)
