@@ -11,8 +11,7 @@ module type K = sig
   val zero : t
   val one : t
   val prod : t -> t -> t
-  val div : t -> t -> t
-  val sqrt : t -> t 
+  val mul : t -> float -> t
   val add : t -> t -> t
   val norm2 : t -> float
   val to_string : t -> string
@@ -56,7 +55,7 @@ module Make = functor (Ev : K) ->  struct
      (Ev.norm2 (self#row i)) +. sum
     end 0.)
     method normalize () = let norm = self#norm () in
-      viterator n (fun i -> self#rowset i (Ev.div (self#row i) norm))
+      viterator n (fun i -> self#rowset i (Ev.mul (self#row i) (1. /. norm)))
   end
   (* }}} *)
   (* Operators Module {{{2 *)

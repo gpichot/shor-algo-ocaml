@@ -7,13 +7,12 @@ que j'ai écrite dans le cadre de mes TIPE en OCaml.
 
  - main.ml : fichier principal fait des vérifications, et autres 
 interactions avec l'utilisateur.
- - misc.ml : contient diverses fonctions peu utilisées
  - arithmetik.ml : toutes les fonctions arithmétiques dont la 
 recherche de l'ordre.
  - quantum.ml : implémentation de registre quantique.
  - matrixFactory.ml : module de matrice générique.
  - log.ml : gestion des entrées et sorties utilisateurs, spécifie
-un mode de debogagge ou non (très simplet).
+un mode de deboggage ou non (très simplet).
 
 ## Makefile
 
@@ -30,5 +29,5 @@ de rentrer directement les deux nombres choisis directement en entrée :
 
     ./shor 15 8
 
-par exemple pour factoriser 15 quand le nombre dont on chercher l'ordre 
+Par exemple pour factoriser 15 quand le nombre dont on cherche l'ordre 
 est 8.

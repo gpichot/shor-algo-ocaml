@@ -7,9 +7,12 @@
 open Log;;        (* Log, debug *)
 open Quantum;;  
 open Sys;;        (* Arguments *)
-open Misc;;       (* Scanf *)
 open Printf;;     (* Printf *)
 open Arithmetik;; (* primeTest *)
+
+
+(* Lire un entier depuis l'entrée *)
+let read_int () = Scanf.scanf " %i" (fun x -> x);;
 
 (* Initialisation (debug, args, random...) {{{1 *)
 print "Simulation de l'algorithme de Shor\n";
