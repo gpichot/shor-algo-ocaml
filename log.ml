@@ -4,7 +4,7 @@ open Printf;;
 
 (** Vars **)
 (* Open the logfile *)
-let logfile = stdout (* open_out "shor.log" *)
+let logfile =  open_out "shor.log" (*stdout * open_out "shor.log" *)
 (* Enabled debug mod *)
 let mod_debug = ref false
 

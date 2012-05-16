@@ -5,11 +5,9 @@
  *  -? ne pas obliger l'utilisateur à rentrer l'entier p. 
  *)
 open Log;;        (* Log, debug *)
-open Quantum;;  
 open Sys;;        (* Arguments *)
 open Printf;;     (* Printf *)
-open Arithmetik;; (* primeTest *)
-
+open Arithmetik;; (* primeTest, order ...*)
 
 (* Lire un entier depuis l'entrée *)
 let read_int () = Scanf.scanf " %i" (fun x -> x);;
@@ -100,6 +98,5 @@ else if isANonTrivialDivisor r2 n then
 else
   print "Impossible de factoriser ce nombre, désolé.";
 (* }}} *)
-
 
 

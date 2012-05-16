@@ -5,6 +5,10 @@ let complex_of_float f = {
   Complex.re = f;
   Complex.im = 0.;
 }
+and complex_of_int i = { 
+  Complex.re = float_of_int i;
+  Complex.im = 0.;
+}
 (* }}} *)
 
 
@@ -25,23 +29,31 @@ open ComplexMatrix
 
 
 (* Register Class {{{1 *)
-exception State_Does_Not_Exist of string;;
+exception Quant_Bad_Access of string;;
 class register n = object
   val size = n
-  val state = new vector (1 lsl n) (* Equivalent à 2^n *)
+  val state = new vector ~rows:(1 lsl n) () (* Equivalent à 2^n *)
   method size () = size
-  (* normalize permet d'être sûr de bien avoir des probabilités *)
+  method nbStates () = 1 lsl n
   method normalize () = state#normalize ()
-  method setStateProbability s v = state#rowset s v
-  (* Non destructif *)
+  method setStateProbability s v = state#rowset (s+1) v
   method getStateProbability s = 
-    if s > state#rows () then raise (State_Does_Not_Exist "getStateProbability")
+    if s > state#rows () then raise (Quant_Bad_Access "getStateProbability")
     else state#row (s+1)
   method dump () =
     print "Le registre est dans l'état :\n";
     for i = 1 to state#rows () do
-      printf "État %i de probabilité %f.\n" (i-1) (Complex.norm(state#row i));
+      printf "État %i : %f.\n" (i-1) (Complex.norm(state#row i));
     done
+  (* Met les n premiers états dans un état de superposition uniforme *)
+  method setUniformSuperposition n =
+    if n > state#rows () then raise (Quant_Bad_Access "setUniformSuperposition")
+    else begin
+      let prob = complex_of_float (sqrt(1. /. (float_of_int n))) in
+      for i = 1 to n do
+        state#rowset i prob
+      done
+    end
   (* Destructif *)
   method measureState () =
     (* On procède ainsi, imaginons l'état suivant :

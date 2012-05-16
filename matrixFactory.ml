@@ -3,7 +3,7 @@ let rec iterator ?(i=0) n f acc = match i with
   | _ -> iterator ~i:(i+1) n f (f i acc)
 let rec viterator ?(i=0) n f = match i with
   | _ when i > n || i = n -> ()
-  | _ -> viterator ~i:(i+1) n f
+  | _ -> f i; viterator ~i:(i+1) n f
 
 (* Ev Module {{{1 *)
 module type K = sig
@@ -47,15 +47,17 @@ module Make = functor (Ev : K) ->  struct
   end
   (* }}} *)
   (* Vector Class {{{2 *)
-  class vector ?data n = object(self)
-    inherit matrix ~dims:(n,1) ?data () as super
+  class vector ?data ?(rows=0) () = object(self)
+    inherit matrix ~dims:(rows,1) ?data () as super
     method row n = super#get n 1
     method rowset n = super#set n 1
-    method norm () = sqrt (iterator n begin fun i sum -> 
-     (Ev.norm2 (self#row i)) +. sum
+    method norm () = sqrt (iterator rows begin fun i sum -> 
+     (Ev.norm2 (self#row (i + 1))) +. sum
     end 0.)
     method normalize () = let norm = self#norm () in
-      viterator n (fun i -> self#rowset i (Ev.mul (self#row i) (1. /. norm)))
+      viterator rows begin fun i -> 
+        self#rowset (i + 1) (Ev.mul (self#row (i + 1)) (1. /. norm))
+      end
   end
   (* }}} *)
   (* Operators Module {{{2 *)

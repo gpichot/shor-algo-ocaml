@@ -25,7 +25,7 @@
 # }}}
 
 DIRS =
-SOURCES = log.ml arithmetik.ml matrixFactory.ml quantum.ml main.ml
+SOURCES = log.ml matrixFactory.ml testMatrix.ml quantum.ml arithmetik.ml main.ml
 EXEC = shor
 
 
