@@ -9,8 +9,9 @@ and complex_of_int i = {
   Complex.re = float_of_int i;
   Complex.im = 0.;
 }
+let ( *! ) = Complex.mul
 (* }}} *)
-
+let pi = acos (-1.);;
 
 module ComplexMatrix = MatrixFactory.Make( 
   struct
@@ -25,7 +26,7 @@ module ComplexMatrix = MatrixFactory.Make(
       Printf.sprintf "%.2f + %.2fI " c.Complex.re c.Complex.im
   end
 );;
-open ComplexMatrix
+open ComplexMatrix;;
 
 
 (* Register Class {{{1 *)
@@ -54,7 +55,25 @@ class register n = object
         state#rowset i prob
       done
     end
-  (* Destructif *)
+  (* Transformation de Fourier discrète sur les q premiers états {{{2 *)
+  method dft q = 
+    let d     = complex_of_float(float_of_int q ** (-0.5)) in
+    let cvals = Array.make q Complex.zero in 
+    for a = 1 to n do
+      for c = 1 to n do
+        cvals.(c) <- Complex.add cvals.(c) (
+          Complex.exp (
+            (complex_of_float(2. *. pi /. (float_of_int q) *. float_of_int(a * c)  ) )
+            *! Complex.i
+          )
+        )
+      done
+    done;
+    for c = 1 to n do
+      state#rowset c (state#row c *! cvals.(c) *! d)
+    done
+  (* }}} *)
+  (* measureState {{{2 *)
   method measureState () =
     (* On procède ainsi, imaginons l'état suivant :
      *             00              01     10   11
@@ -79,25 +98,6 @@ class register n = object
       end else state#rowset i Complex.zero
     done;
     !stateMeasured
-end;;
-(* }}} *)
-(*
-(* Circuit Class {{{1 *)
-class circuit n = object
-  (* Nombre de qubits du circuit *)
-  val nb_qubits = n
-  (* Portes du circuit, les circuits étant linéaires *)
-  val mutable gates = []
-  (* Ajout d'une porte *)
-  method add_gate (gate:gate) = gates = gate :: gates
+  (* }}} *)
 end
 (* }}} *)
- *)
-(*
-(* TEST {{{1 *)
-let reg = new register 5 in
-Printf.printf "Size %i" (1 lsl 5);
-reg#dump ()
-
-(* }}} *)
- *)

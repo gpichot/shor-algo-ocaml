@@ -79,10 +79,9 @@ let order p n =
   reg2#normalize ();
 
   (* Maintenant on applique la transformée de Fourier *)
-
-(*  reg1#dump ();
-  reg2#dump (); *)
-   l
+  reg1#dft q;
+  let r = reg1#measureState () in
+  r
   
 
 (* }}} *)
