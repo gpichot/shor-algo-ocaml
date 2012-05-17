@@ -81,6 +81,7 @@ SOURCES1 = $(SOURCES:.mly=.ml)
 SOURCES2 = $(SOURCES1:.mll=.ml)
 OBJS = $(SOURCES2:.ml=.cmo)
 OPTOBJS = $(SOURCES2:.ml=.cmx)
+OBJSTEX = $(SOURCES:.ml=.tex)
 
 $(EXEC): $(OBJS)
 	$(CAMLC) $(CUSTOM) -o $(EXEC) $(LIBS) $(OBJS)
@@ -88,11 +89,14 @@ $(EXEC): $(OBJS)
 $(EXEC).opt: $(OPTOBJS)
 	$(CAMLOPT) -o $(EXEC) $(LIBS:.cma=.cmxa) $(OPTOBJS)
 
-.SUFFIXES:
 .SUFFIXES: .ml .mli .cmo .cmi .cmx .mll .mly
+
 
 .ml.cmo:
 	$(CAMLC) $(LIBS) -annot -c $<
+
+#.ml.tex:
+# 	lgrind -i -lOCaml $< > latex/$@
 
 .mli.cmi:
 	$(CAMLC) -c $<
