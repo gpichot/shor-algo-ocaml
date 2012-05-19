@@ -10,8 +10,11 @@ and complex_of_int i = {
   Complex.im = 0.;
 }
 let ( *! ) = Complex.mul
+let ( +! ) = Complex.add
 (* }}} *)
 let pi = acos (-1.);;
+let c_to_string = fun (c:Complex.t) ->
+      Printf.sprintf "%.9F + %.9FI " c.Complex.re c.Complex.im
 
 module ComplexMatrix = MatrixFactory.Make( 
   struct
@@ -22,8 +25,7 @@ module ComplexMatrix = MatrixFactory.Make(
     let mul a b = Complex.mul a (complex_of_float b) 
     let add = Complex.add
     let norm2 = Complex.norm2
-    let to_string = fun (c:Complex.t) ->
-      Printf.sprintf "%.2f + %.2fI " c.Complex.re c.Complex.im
+    let to_string = c_to_string
   end
 );;
 open ComplexMatrix;;
@@ -31,20 +33,28 @@ open ComplexMatrix;;
 
 (* Register Class {{{1 *)
 exception Quant_Bad_Access of string;;
-class register n = object
+class register n = object(self)
   val size = n
   val state = new vector ~rows:(1 lsl n) () (* Equivalent à 2^n *)
   method size () = size
   method nbStates () = 1 lsl n
+  method norm () = state#norm ()
   method normalize () = state#normalize ()
+  method setState s = 
+    if Array.length s > state#rows () then raise (Quant_Bad_Access "setState")
+    else begin
+      for i = 0 to Array.length s - 1 do
+        state#rowset (i + 1) s.(i)
+      done;
+    end
   method setStateProbability s v = state#rowset (s+1) v
   method getStateProbability s = 
     if s > state#rows () then raise (Quant_Bad_Access "getStateProbability")
     else state#row (s+1)
   method dump () =
-    print "Le registre est dans l'état :\n";
+    printf "Le registre est dans l'état (norme %f):\n" (self#norm () );
     for i = 1 to state#rows () do
-      printf "État %i : %f.\n" (i-1) (Complex.norm(state#row i));
+      printf "État %i : %s.\n" (i-1) (c_to_string (state#row i));
     done
   (* Met les n premiers états dans un état de superposition uniforme *)
   method setUniformSuperposition n =
@@ -57,21 +67,18 @@ class register n = object
     end
   (* Transformation de Fourier discrète sur les q premiers états {{{2 *)
   method dft q = 
-    let d     = complex_of_float(float_of_int q ** (-0.5)) in
-    let cvals = Array.make q Complex.zero in 
-    for a = 1 to n do
-      for c = 1 to n do
-        cvals.(c) <- Complex.add cvals.(c) (
+    let d       = complex_of_float(float_of_int q ** (-0.5)) in
+    let dftvals = Array.make q Complex.zero in 
+    for a = 0 to q - 1 do
+      for c = 0 to q - 1 do
+        dftvals.(c) <- dftvals.(c) +! (
           Complex.exp (
-            (complex_of_float(2. *. pi /. (float_of_int q) *. float_of_int(a * c)  ) )
-            *! Complex.i
-          )
+            (complex_of_float(2. *. pi /. (float_of_int q) *. float_of_int(a * c)  ) ) *! Complex.i
+          ) *! d *! (state#row (a + 1))
         )
       done
     done;
-    for c = 1 to n do
-      state#rowset c (state#row c *! cvals.(c) *! d)
-    done
+    self#setState dftvals
   (* }}} *)
   (* measureState {{{2 *)
   method measureState () =
@@ -91,7 +98,7 @@ class register n = object
         top := !top +. norm;
         if !bottom < alea && alea < !top then begin
           measured := true;
-          stateMeasured := i;
+          stateMeasured := i - 1;
           state#rowset i Complex.one
         end else begin state#rowset i Complex.zero end;
         bottom := !bottom +. norm 

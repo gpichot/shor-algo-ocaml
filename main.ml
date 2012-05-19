@@ -14,7 +14,7 @@ let read_int () = Scanf.scanf " %i" (fun x -> x);;
 
 (* Initialisation (debug, args, random...) {{{1 *)
 print "Simulation de l'algorithme de Shor\n";
-Random.init 42;
+Random.self_init ();
 set_debug true;
 if !mod_debug then print "Mode DEBUG : on.\n";
 
@@ -75,10 +75,10 @@ end;
 let r     = order p n in
 let ppow  = pow p (r / 2) in
 
-(* Tests sur l'ordre {{{1 *)
+  (* Tests sur l'ordre {{{1 *)
 (* Si r est impair *)
 if r mod 2 = 1 then begin
-  print "Erreur : l'ordre est impair, réessayez avec un autre nombre !";
+  printf "Erreur : l'ordre est impair (%i), réessayez avec un autre nombre !" r;
   exit 0
 end;
 (* Si r est congru a -1 modulo n *)
@@ -92,11 +92,11 @@ end;
 let r1 = pgcd (ppow - 1) n
 and r2 = pgcd (ppow + 1) n in
 if isANonTrivialDivisor r1 n then
-  printf "\nSuccès : %i divise %i." r1 n
+  printf "\nSuccès : %i = %i x %i.\n" n r1 (n / r1)
 else if isANonTrivialDivisor r2 n then
-  printf "\nSuccès : %i divise %i." r2 n
+  printf "\nSuccès : %i = %i x %i.\n" n r2 (n / r2)
 else
-  print "Impossible de factoriser ce nombre, désolé.";
+  printf "Impossible de factoriser ce nombre, désolé (r = %i).\n" r;
 (* }}} *)
 
 

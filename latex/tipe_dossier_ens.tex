@@ -2,31 +2,127 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
-
+\usepackage{braket}
 % Just Fuck Listings Package which do not support UTF-8 O_o
 %\usepackage{listings}
 \usepackage{lgrind}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{textcomp}
+\usepackage{stmaryrd}
+\usepackage{mathabx}
 \usepackage{xcolor}
 \usepackage{lscape}
 \usepackage[top=2cm,bottom=2cm,left=1.5cm,right=1.5cm]{geometry}
 
 %opening
-\title{}
-\author{}
+\title{L'algorithme de \textsc{Shor}}
+\author{Gabriel Pichot}
+
+\newcommand{\abs}[1]{\lvert #1 \rvert}
+\newcommand{\C}{\ensuremath{\mathbb{C}}}
+\newcommand{\intEntier}[1]{\ensuremath{\llbracket #1 \rrbracket}}
+\renewcommand{\O}{\ensuremath{\mathcal{O}}}
+\newcommand{\code}[1]{#1}
 
 \begin{document}
-
 \maketitle
 
 \begin{abstract}
-
+Le présent document présente les éléments principaux intervenant dans
+l'algorithme de \textsc{Shor} et donc dans la recherche de l'ordre d'un élément.
+Une implémentation en langage OCaml est proposée.
 \end{abstract}
 
-\section{}
+\newpage
+Trouver des algorithmes pour factoriser des nombres quelconques est en soi une
+problématique. On sait que tout nombre est se décompose en produit de facteur(s)
+premier(s). Le soucis est bien entendu de trouver ses facteurs. Pour des petits
+nombres on y arrive facilement, pour de plus grands par des propriétés
+remarquables (carré parfait, multiple de deux, congruences...). Cependant pour
+des grands nombre cela vient plus difficile un outil informatique
 
+\section{Tirer parti d'un calculateur quantique}
+\subsection{Classique et quantique}
+Dans un ordinateur classique, l'information minimale est d'ordinaire stockée
+sous la forme d'un bit qui peut prendre soit la valeur $0$ soit la valeur $1$.
+Le nombre de bits requis pour stocker une dépendant alors de la manière de
+représenter cette information. 
+De la même façon, dans un ordinateur quantique on considère des qubits (pour
+quantum bit). Ceux-ci, a contrario des précédents sont dans une superposition
+des deux états possibles, $0$ et $1$. Ainsi l'information codée n'est plus
+stockée de façon binaire soit $0$ soit $1$ mais au contraire comme composition
+de ces deux composantes. Ainsi un qubit peut aisément être représenté par un
+vecteur de $\C^2$. Appelant $\ket 0$ et $\ket 1$ les deux éléments formant une
+base de cet espace on obtient que tout qubit peut s'écrire formellement :
+\[ a \cdot \ket 0 + b \cdot \ket 1 \text{ avec } a,b\in\C \text{ et } \abs a
+^2 + \abs b ^2 = 1 \]
+Cette dernière condition traduit une condition supplémentaire : en vérité, on
+ne peut pas accéder à l'information stockée dans un qubit. Ainsi il nous est
+tout simplement impossible de mesurer les deux composantes, car lors de la
+mesure le qubit se \og fige \fg{} dans un état, soit $0$ soit $1$. Cet état
+dépend tout de même de $a$ et de $b$, dont les modules au carré représentent la
+probabilité de tomber dans cet état.
+Par extension, on parle de registre pour un ensemble de qubits, cette fois-ci
+l'état du registre est donc un vecteur, dans le cas d'un registre de $n$
+qubits, de $\C^{2n}$, ce qui induit donc la représentation formelle :
+\[ \sum_{i=0}^{n-1} a_i \ket {U_i} \text{ avec } \forall i \in
+\intEntier{0,n-1} , a_i \in\C \text{ et } \sum_{i=0}^{n-1} \abs{a_i} ^2 =
+1 \]
+
+Si on apprends à l'école à diviser des nombres on s'arrange vite 
+\subsection{Intrication quantique}
+\section{À la recherche de l'ordre}
+\subsection{Exponentiation modulaire}
+Dans le second registre, on doit calculer $x ^ a \mod n$, pour cela il existe
+plusieurs méthodes certaines plus astucieuses que d'autres. Une première
+méthode plutôt naïve consisterait à calculer les résidus modulo $n$ successifs
+des puissances de $x$ successives (on élimine directement l'idée de calculer
+$x^a$ puis son résidu, car on peut facilement dépasser la limite des entiers
+définie pour le langage (\code{max\_int} en OCaml)). Ce qui donne un
+algorithme d'un ordre de complexité en $\O(a)$. Cependant une solution beaucoup
+plus efficace est de considérer un algorithme d’exponentiation rapide.
+Si on écrit $a = \sum_{i=0}^{n} a_i 2^i$, c'est à dire $a$ dans son écriture
+binaire $a_n a_{n-1} \dots a_1 a_0$. On en déduit donc 
+\[ x^a = x ^ {\sum_{i=0}^{n} a_i 2^i} = \prod_{i=0}^{n} x ^ {a_i 2^i}
+ =  \prod_{i=0}^{n} \left( x ^ {2^i}\right) ^{a_i} \]
+L'opération de congruence possédant des propriétés remarquables par rapport au
+produit (et donc au puissance), on remarque qu'il suffit de considérer
+uniquement des puissances de $x$ de la forme $x ^ {2^i}$. Encore mieux, lorsque
+$a_i = 0$ le résidu est simplement $1$. Par suite il vient l'algorithme suivant
+:
+\begin{verbatim}
+let expModulaire x a n =
+  let residu  = ref 1
+  and a_bin   = ref a
+  and x_puis  = ref x in
+  while !a_bin > 0 do
+    if a_bin land 1 = 1 then begin(* Si le bit de poids faible est 1 *)
+      residu := !residu * x_puis % n
+    end;
+    x_puis := !x_puis * x_puis % n; (* Contient les puissance de 2 de x *)
+    a_bin  := a_bin lsr 1; (* On décale vers la droite (supprime le bit de
+poids faible *)
+  done;
+  !residu
+\end{verbatim}
+Cette algorithme présente l'avantage d'être très rapide ainsi pour des entiers
+codés sur $32$ bits, on fait dans le pire des cas $32$ tours de boucle. En
+fait, on montre (même principe que pour l'exponentiation rapide) que la
+fonction ci-dessus a une complexité en $\O(log_2(a))$. 
+
+\subsection{Approximation de réels par des fractions continues}
+
+\appendix
+\section{Implémentation}
+\subsection{Fichier main.ml}
 \lgrindfile{main.tex}
+\subsection{Module Arithmetik}
 \lgrindfile{arithmetik.tex}
+\subsection{Module Quantum.ml}
 \lgrindfile{quantum.tex}
+\subsection{Module MatrixFactory}
 \lgrindfile{matrixFactory.tex}
 
 \end{document}
