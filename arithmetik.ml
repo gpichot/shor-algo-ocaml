@@ -7,6 +7,7 @@
 open Log;;
 open Printf;;
 open Quantum;;
+open Print;;
 
 (* primeTest {{{1
  * Détermine si un nombre est premier ou non (exact).
@@ -80,7 +81,7 @@ let rec nb_bits = function
   | 0 -> 0
   | n -> 1 + (nb_bits (n lsr 1))
 
-let order p n = 
+let order ~print ~texPrint p n = 
   log "\n---- Recherche de l'ordre de %i dans %i ----\n" p n; 
   let l = getQ n in
   let q = pow 2 l in
@@ -105,23 +106,21 @@ let order p n =
   (* ... mais on veut des probabilités donc on normalise *)
   reg2#normalize ();
   (* On mesure le second registre *)
-  let value = 2 in (*reg2#measureState () in *)
+  let value = reg2#measureState () in
   (* On doit répercuter cette mesure sur le premier registre *)
   for a = 0 to q - 1 do
     reg1#setStateProbability a (if sauvExpMod.(a) = value then Complex.one else Complex.zero)
   done;
   (* Et on oublie pas de normaliser *)
   reg1#normalize ();
-  reg1#dump ();
   (* Maintenant on applique la transformée de Fourier *)
   log "Transformée de Fourier.\n";
-  let a = reg1#qft () in
-  Array.iteri (fun i j -> Printf.printf "Etat %i vaut %s.\n" i (c_to_string j)) a;
-  printf "vrai dft";
-  reg1#dft q;
-  reg1#dump ();
+  reg1#fft (); (* ou reg1#dft q() mais moins performant :) *)
   log "Fin de la transformée de Fourier.\n";
   reg1#normalize ();
+  (* Si on doit afficher le résultat de la transformée de Fourier *)
+  if print then showProb (reg1#state ());
+  if texPrint then printAsTex (reg1#state ()) p n;
   (* On mesure c sur le premier registre *)
   let c = reg1#measureState () in
   log "On trouve pour c : %i.\n" c;

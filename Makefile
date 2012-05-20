@@ -25,7 +25,7 @@
 # }}}
 
 DIRS =
-SOURCES = log.ml matrixFactory.ml quantum.ml arithmetik.ml main.ml
+SOURCES = log.ml matrixFactory.ml quantum.ml print.ml arithmetik.ml main.ml
 EXEC = shor
 
 
@@ -40,7 +40,7 @@ CAMLYACC = ocamlyacc
 # The list of Caml libraries needed by the program
 
 # LIBS=$(WITHGRAPHICS) $(WITHUNIX) $(WITHSTR) $(WITHNUMS) $(WITHTHREADS) $(WITHDBM)
-
+LIBS=$(WITHGRAPHICS)
 # Should be set to -custom if you use any of the libraries above
 # or if any C code have to be linked with your program
 # (irrelevant for ocamlopt)

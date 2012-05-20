@@ -38,29 +38,33 @@ let p =
   end
 in
 printf "Le nombre qui va nous servir (et qui ne divise pas n) est : %i.\n" p;
+(* On peut aussi afficher les graphes d'après de transformée de Fourier avec
+ * l'option --print mise en dernière *)
+let printState = nb_args >= 4 && argv.(3) = "--print" in
+let texPrint   = nb_args >= 4 && argv.(3) = "--tex" in
 (* }}} *)
 
 (* Vérifications {{{1 *) 
 (* 1) N n'est pas pair *)
 if n mod 2 = 0 then begin
-  print "Erreur : Le nombre à factoriser doit être impair !";
+  print "Erreur : Le nombre à factoriser doit être impair !\n";
   exit 0
 end;
 (* 2) Si le nombre est premier *)
 if primeTest n then begin
-  print "Erreur : Le nombre ne doit pas être premier !";
+  print "Erreur : Le nombre ne doit pas être premier !\n";
   exit 0
 end;
 (* @TODO
  * 3) Teste si le nombre est la puissance d'un nombre premier (ne fait rien 
  * pour le moment en vérité) *)
 if primePowTest n then begin
-  print "Erreur : le nombre ne doit être la puisance d'un nombre premier !";
+  print "Erreur : le nombre ne doit être la puisance d'un nombre premier !\n";
   exit 0
 end;
 (* Teste si 1 <= p <= n - 1 *)
 if 1 > p || p >= n then begin
-  printf "Erreur : l'entier p doit être compris entre 1 et le nombre à factoriser strictement";
+  printf "Erreur : l'entier p doit être compris entre 1 et le nombre à factoriser strictement.\n";
   exit 0
 end;
 (* Teste si n et p sont bien premiers entre eux *)
@@ -72,18 +76,18 @@ end;
 
 (* Ce qui suit peut paraître dérisoire mais c'est pourtant le coeur de notre
  * algorithme et tout notre sujet :) *)
-let r     = order p n in
+let r     = order ~print:printState ~texPrint p n in
 let ppow  = pow p (r / 2) in
 
   (* Tests sur l'ordre {{{1 *)
 (* Si r est impair *)
 if r mod 2 = 1 then begin
-  printf "Erreur : l'ordre est impair (%i), réessayez avec un autre nombre !" r;
+  printf "Erreur : l'ordre est impair (%i), réessayez avec un autre nombre !\n" r;
   exit 0
 end;
 (* Si r est congru a -1 modulo n *)
 if ppow mod n = n - 1 then begin
-  print "Erreur : x^(r/2) est congru à -1 modulo n !, un autre entier ?";
+  print "Erreur : x^(r/2) est congru à -1 modulo n !, un autre entier ?\n";
   exit 0
 end;
 (* }}} *)

@@ -41,6 +41,7 @@ class register n = object(self)
   val size = n
   val state = new vector ~rows:(1 lsl n) () (* Equivalent à 2^n *)
   method size () = size
+  method state () = state
   method nbStates () = 1 lsl n
   method norm () = state#norm ()
   method normalize () = state#normalize ()
@@ -84,14 +85,14 @@ class register n = object(self)
     done;
     self#setState dftvals
   (* }}} *)
-  (* Transformée de Fourier rapide (car q est une puissance de 2 !!! {{{2 *)
-  method qft () =
-    let rec qft_aux ?(step=1) ?(start=0) () =
+  (* Transformée de Fourier rapide (car q est une puissance de 2 !!!) {{{2 *)
+  method fft () =
+    let rec fft_aux ?(step=1) ?(start=0) () =
       let n = state#rows () / step in
       if n = 1 then [| state#row (start + 1) |]
       else begin
-        let even = qft_aux ~step:(step * 2) ~start ()
-        and odd  = qft_aux ~step:(step * 2) ~start:(start + step) () in
+        let even = fft_aux ~step:(step * 2) ~start ()
+        and odd  = fft_aux ~step:(step * 2) ~start:(start + step) () in
         let c  = ref Complex.one
         and w  = w n
         and u' = Array.make n Complex.zero in
@@ -102,7 +103,7 @@ class register n = object(self)
         done;
         u'
       end
-    in qft_aux ()
+    in self#setState (fft_aux ())
     (* }}} *)
   (* measureState {{{2 *)
   method measureState () =
