@@ -65,7 +65,7 @@ if 1 > p || p >= n then begin
 end;
 (* Teste si n et p sont bien premiers entre eux *)
 if pgcd n p <> 1 then begin
-  printf "Pseudo-Succès :  %i | %i (sans passer l'algorithme de Shor).\n" p n;
+  printf "Pseudo-Succès :  %i | %i (sans passer l'algorithme de Shor).\n" (pgcd p n) n;
   exit 0
 end;
 (* }}} *)

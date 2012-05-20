@@ -51,8 +51,7 @@ let expModulaire x a n =
   in expMod_aux x a 1
 (* }}} *)
 (* Approximation du réél a par une fraction {{{ *) 
-(* Les fractions continues fournissent une bonne approximation, on veut
- * toutefois un dénominateur inférieur à n *)
+(* Les fractions continues fournissent une bonne approximation *)
 let approx x q = 
   let rec reduite (p0,p1) (q0,q1) r precis =
     if abs_float (p1 /. q1 -. x) < precis then (p1, q1)
@@ -82,17 +81,19 @@ let rec nb_bits = function
   | n -> 1 + (nb_bits (n lsr 1))
 
 let order p n = 
-  log "order %i in %i\n" p n; 
+  log "\n---- Recherche de l'ordre de %i dans %i ----\n" p n; 
   let l = getQ n in
   let q = pow 2 l in
-  log "On trouve q = %i = 2 ^ %i\n" q l;
+  log "On trouve q = %i = 2 ^ %i.\n" q l;
   let reg1 = new register l
   and reg2 = new register (nb_bits n) in
-  printf "Création de deux registres de tailles respectives %i,  %i.\n" 
+  log "Création de deux registres de tailles respectives %i et %i.\n" 
     (reg1#size()) (reg2#size());
   (* On met le premier registre dans un état de superposition uniforme *)
   reg1#setUniformSuperposition q;
-  (* On calcule x ^ a mod n pour tous les a *)
+  (* On calcule x ^ a mod n pour tous les a, on doit cependant
+   * penser à les conserver (ce que ne peut pas faire un calculateur 
+   * quantique) pour les "superposer" avec le premier registre ensuite. *)
   let expModTemp = Array.make n Complex.zero in
   let sauvExpMod = Array.make q 0 in
   for a = 0 to q - 1 do
@@ -101,7 +102,7 @@ let order p n =
     expModTemp.(state) <- expModTemp.(state) +! Complex.one
   done;
   reg2#setState expModTemp;
-  (* ... mais on veut des probabilités ! *)
+  (* ... mais on veut des probabilités donc on normalise *)
   reg2#normalize ();
   (* On mesure le second registre *)
   let value = 2 in (*reg2#measureState () in *)
@@ -109,19 +110,25 @@ let order p n =
   for a = 0 to q - 1 do
     reg1#setStateProbability a (if sauvExpMod.(a) = value then Complex.one else Complex.zero)
   done;
-  (* Et on oublis pas de normaliser *)
+  (* Et on oublie pas de normaliser *)
   reg1#normalize ();
+  reg1#dump ();
   (* Maintenant on applique la transformée de Fourier *)
+  log "Transformée de Fourier.\n";
+  let a = reg1#qft () in
+  Array.iteri (fun i j -> Printf.printf "Etat %i vaut %s.\n" i (c_to_string j)) a;
+  printf "vrai dft";
   reg1#dft q;
+  reg1#dump ();
+  log "Fin de la transformée de Fourier.\n";
   reg1#normalize ();
   (* On mesure c sur le premier registre *)
-  (*reg1#dump ();*)
   let c = reg1#measureState () in
-  printf "On trouve pour c : %i.\n" c;
+  log "On trouve pour c : %i.\n" c;
   (* On approche le réel grâce aux fractions continues *)
   let s =  (float_of_int c) /. (float_of_int q) in
   let (d,r) = approx s (float_of_int q) in
-  printf "On trouve pour approximation de %f ~ d / r = %i / %i.\n" s d r;
+  log "---- Un ordre possible est donc %i. ----\n" r;
   r
   
 

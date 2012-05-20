@@ -11,10 +11,14 @@ and complex_of_int i = {
 }
 let ( *! ) = Complex.mul
 let ( +! ) = Complex.add
+let ( -! ) = Complex.sub
 (* }}} *)
 let pi = acos (-1.);;
 let c_to_string = fun (c:Complex.t) ->
       Printf.sprintf "%.9F + %.9FI " c.Complex.re c.Complex.im
+let w n = Complex.exp (
+  (complex_of_float(2. *. pi /. (float_of_int n)  ) ) *! Complex.i
+)
 
 module ComplexMatrix = MatrixFactory.Make( 
   struct
@@ -80,6 +84,26 @@ class register n = object(self)
     done;
     self#setState dftvals
   (* }}} *)
+  (* Transformée de Fourier rapide (car q est une puissance de 2 !!! {{{2 *)
+  method qft () =
+    let rec qft_aux ?(step=1) ?(start=0) () =
+      let n = state#rows () / step in
+      if n = 1 then [| state#row (start + 1) |]
+      else begin
+        let even = qft_aux ~step:(step * 2) ~start ()
+        and odd  = qft_aux ~step:(step * 2) ~start:(start + step) () in
+        let c  = ref Complex.one
+        and w  = w n
+        and u' = Array.make n Complex.zero in
+        for k = 0 to n / 2 - 1 do 
+          u'.(k) <- even.(k) +! !c *! odd.(k);
+          u'.(k + n / 2) <- even.(k) -! !c *! odd.(k);
+          c := !c *! w
+        done;
+        u'
+      end
+    in qft_aux ()
+    (* }}} *)
   (* measureState {{{2 *)
   method measureState () =
     (* On procède ainsi, imaginons l'état suivant :
