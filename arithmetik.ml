@@ -81,7 +81,7 @@ let rec nb_bits = function
   | 0 -> 0
   | n -> 1 + (nb_bits (n lsr 1))
 
-let order ~print ~texPrint p n = 
+let order ~texPrint p n = 
   log "\n---- Recherche de l'ordre de %i dans %i ----\n" p n; 
   let l = getQ n in
   let q = pow 2 l in
@@ -119,8 +119,7 @@ let order ~print ~texPrint p n =
 (*  log "Fin de la transformée de Fourier.\n";*)
   reg1#normalize ();
   (* Si on doit afficher le résultat de la transformée de Fourier *)
-  if print then showProb (reg1#state ());
-  if texPrint then printAsTex (reg1#state ()) p n;
+  if texPrint then printAsTex reg1 p n;
   (* On mesure c sur le premier registre *)
   let c = reg1#measureState () in
  (* log "On trouve pour c : %i.\n" c;*)

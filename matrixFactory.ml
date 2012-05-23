@@ -30,8 +30,9 @@ module Make = functor (Ev : K) ->  struct
     val data = match data with 
       | Some x -> x 
       | None -> Array.make_matrix (fst dims) (snd dims) Ev.zero
-    method rows () = rows
-    method cols () = cols
+    method rows = rows
+    method cols = cols
+    method data = data
     method get row col = data.(row-1).(col-1)
     method set row col value = data.(row-1).(col-1) <- value
     method to_string () =

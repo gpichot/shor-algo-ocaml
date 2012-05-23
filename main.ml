@@ -38,9 +38,8 @@ let p =
   end
 in
 log "Le nombre qui va nous servir (et qui ne divise pas n) est : %i.\n" p;
-(* On peut aussi afficher les graphes d'après de transformée de Fourier avec
- * l'option --print mise en dernière *)
-let printState = nb_args >= 4 && argv.(3) = "--print" in
+(* On peut aussi afficher les graphes après la transformée de Fourier avec
+ * l'option --tex *)
 let texPrint   = nb_args >= 4 && argv.(3) = "--tex" in
 (* }}} *)
 
@@ -103,15 +102,16 @@ in
 let success = ref false 
 and attempts = ref 5 in
 while not !success && !attempts > 0 do
-  let r = order ~print:printState ~texPrint p n in
+  let r = order ~texPrint p n in
   log "Ordre possible trouvé : %i.\n" r; 
   if not (orderFail r p) then begin
     let factor = findFactor r p in
     if factor <> 0 then begin
       log "\n ---- Succès : %i = %i x %i. ----\n" n factor (n / factor);
       success := true
-    end
-  end;
+    end else
+      log "Cet ordre ne permet pas de factoriser %i.\n" n;
+  end; 
   decr attempts
 done;
 if not !success then

@@ -1,5 +1,9 @@
+
 open Log;;
 open Printf;;
+
+(* Pi *)
+let pi = acos (-1.);;
 (* Quelques fonctions sur les complexes {{{1 *)
 let complex_of_float f = {
   Complex.re = f;
@@ -12,14 +16,14 @@ and complex_of_int i = {
 let ( *! ) = Complex.mul
 let ( +! ) = Complex.add
 let ( -! ) = Complex.sub
-(* }}} *)
-let pi = acos (-1.);;
+
 let c_to_string = fun (c:Complex.t) ->
       Printf.sprintf "%.9F + %.9FI " c.Complex.re c.Complex.im
 let w n = Complex.exp (
   (complex_of_float(2. *. pi /. (float_of_int n)  ) ) *! Complex.i
 )
-
+(* }}} *)
+(* Module Matrix pour les complexes {{{1 *)
 module ComplexMatrix = MatrixFactory.Make( 
   struct
     type t = Complex.t
@@ -33,41 +37,39 @@ module ComplexMatrix = MatrixFactory.Make(
   end
 );;
 open ComplexMatrix;;
+(* }}} *)
 
 
 (* Register Class {{{1 *)
 exception Quant_Bad_Access of string;;
 class register n = object(self)
+  inherit vector ~rows:(1 lsl n) () as super
   val size = n
-  val state = new vector ~rows:(1 lsl n) () (* Equivalent à 2^n *)
   method size () = size
-  method state () = state
-  method nbStates () = 1 lsl n
-  method norm () = state#norm ()
-  method normalize () = state#normalize ()
+  method nbStates = self#rows
   method setState s = 
-    if Array.length s > state#rows () then raise (Quant_Bad_Access "setState")
+    if Array.length s > self#nbStates then raise (Quant_Bad_Access "setState")
     else begin
       for i = 0 to Array.length s - 1 do
-        state#rowset (i + 1) s.(i)
+        self#rowset (i + 1) s.(i)
       done;
     end
-  method setStateProbability s v = state#rowset (s+1) v
+  method setStateProbability s v = self#rowset (s+1) v
   method getStateProbability s = 
-    if s > state#rows () then raise (Quant_Bad_Access "getStateProbability")
-    else state#row (s+1)
+    if s > self#nbStates then raise (Quant_Bad_Access "getStateProbability")
+    else self#row (s+1)
   method dump () =
     printf "Le registre est dans l'état (norme %f):\n" (self#norm () );
-    for i = 1 to state#rows () do
-      printf "État %i : %s.\n" (i-1) (c_to_string (state#row i));
+    for i = 1 to self#rows do
+      printf "État %i : %s.\n" (i-1) (c_to_string (self#row i));
     done
   (* Met les n premiers états dans un état de superposition uniforme *)
   method setUniformSuperposition n =
-    if n > state#rows () then raise (Quant_Bad_Access "setUniformSuperposition")
+    if n > self#nbStates then raise (Quant_Bad_Access "setUniformSuperposition")
     else begin
       let prob = complex_of_float (sqrt(1. /. (float_of_int n))) in
       for i = 1 to n do
-        state#rowset i prob
+        self#rowset i prob
       done
     end
   (* Transformation de Fourier discrète sur les q premiers états {{{2 *)
@@ -76,19 +78,22 @@ class register n = object(self)
     for a = 0 to q - 1 do
       for c = 0 to q - 1 do
         dftvals.(c) <- dftvals.(c) +! (
-          Complex.exp (
-            (complex_of_float(2. *. pi /. (float_of_int q) *. float_of_int(a * c)  ) ) *! Complex.i
-          ) *! (state#row (a + 1))
+          Complex.exp ( (
+              complex_of_float(
+                2. *. pi /. (float_of_int q) *. float_of_int(a * c)  
+              ) 
+            ) *! Complex.i
+          ) *! (self#row (a + 1))
         )
       done
     done;
     self#setState dftvals
   (* }}} *)
-  (* Transformée de Fourier rapide (car q est une puissance de 2 !!!) {{{2 *)
+  (* Transformée de Fourier rapide (q est une puissance de 2) {{{2 *)
   method fft () =
     let rec fft_aux ?(step=1) ?(start=0) () =
-      let n = state#rows () / step in
-      if n = 1 then [| state#row (start + 1) |]
+      let n = self#rows / step in
+      if n = 1 then [| self#row (start + 1) |]
       else begin
         let even = fft_aux ~step:(step * 2) ~start ()
         and odd  = fft_aux ~step:(step * 2) ~start:(start + step) () in
@@ -116,17 +121,17 @@ class register n = object(self)
     and alea          = float_of_int (Random.int max_int) /. (float_of_int max_int)
     and bottom        = ref 0. 
     and top           = ref 0. in  
-    for i = 1 to state#rows () do
+    for i = 1 to self#rows do
       if not !measured then begin
-        let norm = (Complex.norm2 (state#row i)) in
+        let norm = (Complex.norm2 (self#row i)) in
         top := !top +. norm;
         if !bottom < alea && alea < !top then begin
           measured := true;
           stateMeasured := i - 1;
-          state#rowset i Complex.one
-        end else begin state#rowset i Complex.zero end;
+          self#rowset i Complex.one
+        end else begin self#rowset i Complex.zero end;
         bottom := !bottom +. norm 
-      end else state#rowset i Complex.zero
+      end else self#rowset i Complex.zero
     done;
     !stateMeasured
   (* }}} *)
