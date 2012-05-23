@@ -17,4 +17,4 @@ let log fmt = printf fmt
 (* Log the debug fmt if necessary *)
 let debug fmt = if !mod_debug then fprintf logfile fmt else ifprintf logfile fmt
 (* Show in the console (do not forget to use the ! to flush the data) *)
-let print = printf "%s%!" 
+let print = printf "%s%!"

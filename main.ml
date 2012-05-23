@@ -15,7 +15,7 @@ let read_int () = Scanf.scanf " %i" (fun x -> x);;
 (* Initialisation (debug, args, random...) {{{1 *)
 print "Simulation de l'algorithme de Shor\n";
 Random.self_init ();
-set_debug true;
+set_debug false;
 if !mod_debug then print "Mode DEBUG : on.\n";
 
 
