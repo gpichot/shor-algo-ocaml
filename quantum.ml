@@ -72,14 +72,13 @@ class register n = object(self)
     end
   (* Transformation de Fourier discrète sur les q premiers états {{{2 *)
   method dft q = 
-    let d       = complex_of_float(float_of_int q ** (-0.5)) in
     let dftvals = Array.make q Complex.zero in 
     for a = 0 to q - 1 do
       for c = 0 to q - 1 do
         dftvals.(c) <- dftvals.(c) +! (
           Complex.exp (
             (complex_of_float(2. *. pi /. (float_of_int q) *. float_of_int(a * c)  ) ) *! Complex.i
-          ) *! d *! (state#row (a + 1))
+          ) *! (state#row (a + 1))
         )
       done
     done;

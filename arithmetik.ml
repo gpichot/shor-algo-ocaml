@@ -85,11 +85,11 @@ let order ~print ~texPrint p n =
   log "\n---- Recherche de l'ordre de %i dans %i ----\n" p n; 
   let l = getQ n in
   let q = pow 2 l in
-  log "On trouve q = %i = 2 ^ %i.\n" q l;
+(*  log "On trouve q = %i = 2 ^ %i.\n" q l; *)
   let reg1 = new register l
   and reg2 = new register (nb_bits n) in
-  log "Création de deux registres de tailles respectives %i et %i.\n" 
-    (reg1#size()) (reg2#size());
+(*  log "Création de deux registres de tailles respectives %i et %i.\n" 
+    (reg1#size()) (reg2#size());*)
   (* On met le premier registre dans un état de superposition uniforme *)
   reg1#setUniformSuperposition q;
   (* On calcule x ^ a mod n pour tous les a, on doit cependant
@@ -114,20 +114,20 @@ let order ~print ~texPrint p n =
   (* Et on oublie pas de normaliser *)
   reg1#normalize ();
   (* Maintenant on applique la transformée de Fourier *)
-  log "Transformée de Fourier.\n";
+(*  log "Transformée de Fourier.\n"; *)
   reg1#fft (); (* ou reg1#dft q() mais moins performant :) *)
-  log "Fin de la transformée de Fourier.\n";
+(*  log "Fin de la transformée de Fourier.\n";*)
   reg1#normalize ();
   (* Si on doit afficher le résultat de la transformée de Fourier *)
   if print then showProb (reg1#state ());
   if texPrint then printAsTex (reg1#state ()) p n;
   (* On mesure c sur le premier registre *)
   let c = reg1#measureState () in
-  log "On trouve pour c : %i.\n" c;
+ (* log "On trouve pour c : %i.\n" c;*)
   (* On approche le réel grâce aux fractions continues *)
   let s =  (float_of_int c) /. (float_of_int q) in
   let (d,r) = approx s (float_of_int q) in
-  log "---- Un ordre possible est donc %i. ----\n" r;
+(*  log "---- Un ordre possible est donc %i. ----\n" r;*)
   r
   
 

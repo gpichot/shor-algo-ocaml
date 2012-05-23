@@ -4,7 +4,7 @@ open Quantum;;
 
 let showProb u = 
   let n = u#rows () in
-  let base = 800 / n in
+  let base = if 800 / n = 0 then 1 else 800 / n in
   let swidth = base * n
   and sheight = 300 in
   open_graph (Printf.sprintf " %ix%i" swidth sheight);
@@ -21,7 +21,7 @@ let printAsTex u n p =
   let rec obtainList = function
     | 0 -> []
     | k -> let y = Complex.norm2 (u#row k) in
-      if y > 0.0001 then (k,y) :: (obtainList (k - 1))
+      if y > 0.00001 then (k,y) :: (obtainList (k - 1))
       else obtainList (k - 1)
   and max = List.fold_left (fun a b -> if snd a > snd b then a else b) (0,0.) in
   let data = obtainList (u#rows ()) in
