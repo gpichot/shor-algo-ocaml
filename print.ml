@@ -27,7 +27,8 @@ let printAsTex reg n p =
   done;
   out := !out ^ "  \\foreach \\x in {0,2,...,16} \\draw (\\x,0) -- (\\x,0.2);
     \\draw[very thick] plot[ycomb] coordinates {\n";
-  output_string file (!out ^ s ^ "};\n\\end{tikzpicture}")
+  output_string file (!out ^ s ^ "};\n\\end{tikzpicture}");
+  close_out file
 ;;
    
 

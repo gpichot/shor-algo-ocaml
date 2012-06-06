@@ -54,10 +54,7 @@ class register n = object(self)
         self#rowset (i + 1) s.(i)
       done;
     end
-  method setStateProbability s v = self#rowset (s+1) v
-  method getStateProbability s = 
-    if s > self#nbStates then raise (Quant_Bad_Access "getStateProbability")
-    else self#row (s+1)
+  method setStateProbability s v = self#rowset (s + 1) v
   method dump () =
     printf "Le registre est dans l'état (norme %f):\n" (self#norm () );
     for i = 1 to self#rows do

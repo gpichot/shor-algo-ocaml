@@ -1,7 +1,6 @@
 (*
  * Ce fichier contient le squelette de l'application, vérifications etc.
  * @TODO :
- *  - faire la fonction primePowTest
  *  -? ne pas obliger l'utilisateur à rentrer l'entier p. 
  *)
 open Log;;        (* Log, debug *)
@@ -46,24 +45,23 @@ let texPrint   = nb_args >= 4 && argv.(3) = "--tex" in
 (* Vérifications {{{1 *) 
 (* 1) N n'est pas pair *)
 if n mod 2 = 0 then begin
-  log "Erreur : Le nombre à factoriser doit être impair !\n";
+  log "Échec : Le nombre à factoriser doit être impair !\n";
   exit 0
 end;
 (* 2) Si le nombre est premier *)
 if primeTest n then begin
-  log "Erreur : Le nombre ne doit pas être premier !\n";
+  log "Échec : Le nombre ne doit pas être premier !\n";
   exit 0
 end;
-(* @TODO
- * 3) Teste si le nombre est la puissance d'un nombre premier (ne fait rien 
+(* 3) Teste si le nombre est la puissance d'un nombre (ne fait rien 
  * pour le moment en vérité) *)
-if primePowTest n then begin
-  log "Erreur : le nombre ne doit être la puisance d'un nombre premier !\n";
+if primePowerTest n then begin
+  log "Échec : le nombre ne doit être la puisance d'un nombre premier !\n";
   exit 0
 end;
 (* Teste si 1 <= p <= n - 1 *)
 if 1 > p || p >= n then begin
-  log "Erreur : l'entier p doit être compris entre 1 et le nombre à factoriser strictement.\n";
+  log "Échec : l'entier p doit être compris entre 1 et le nombre à factoriser strictement.\n";
   exit 0
 end;
 (* Teste si n et p sont bien premiers entre eux *)
@@ -102,7 +100,7 @@ in
 let success = ref false 
 and attempts = ref 5 in
 while not !success && !attempts > 0 do
-  let r = order ~texPrint p n in
+  let r = order ~texPrint:(texPrint && !attempts = 5) p n in
   log "Ordre possible trouvé : %i.\n" r; 
   if not (orderFail r p) then begin
     let factor = findFactor r p in

@@ -3,19 +3,21 @@
 
 
 \usepackage{lgrind}
+
+\usepackage{tikz}
 \usepackage{pgfplots}
+\usetikzlibrary{calc}
 \usetikzlibrary{external}
 \tikzexternalize[prefix=tikz/]
-\usepackage{tikz}
-\usetikzlibrary{calc}
+
 
 \usepackage[top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
 \usepackage{stmaryrd}
 \usepackage{mathabx}
-\def\@biblabel#1{}
-\noexpandarg
+\usepackage{xspace}
+\input{common_def.tex}
 
-\exploregroups
+
 %opening
 \title{L'algorithme de \textsc{Shor}}
 \subtitle{À la recherche de l'ordre}
@@ -23,32 +25,7 @@
 \scolaryear{2011-2012}
 \author{Gabriel Pichot}
 
-\DeclareMathOperator{\pgcd}{pgcd}
-\newcommand{\abs}[1]{\left| #1 \right|}
-\newcommand{\C}{\ensuremath{\mathbb{C}}}
-\newcommand{\Z}{\ensuremath{\mathbb{Z}}}
-\newcommand{\intEntier}[1]{\ensuremath{\llbracket #1 \rrbracket}}
-\renewcommand{\O}{\ensuremath{\mathcal{O}}}
-\newcommand{\code}[1]{#1}
-\newcommand{\ZnZ}[1]{\ensuremath{\Z\slash #1\Z}}
-{
-  \theoremstyle{plain}
-  \theoremseparator{.}
-  \theoremprework{\medskip\hrule\medskip}
-  \theorempostwork{\hrule\bigskip}
-  \theorembodyfont{\sffamily}
-  \newtheorem*{definition}{Définition}
-  \theoremprework{\medskip\hrule\medskip}
-  \theorempostwork{\hrule\bigskip}
-  \newtheorem*{propriete}{Propriété}
-}
-{
-  \theorembodyfont{\normalfont}
-  \theoremsymbol{\ensuremath{\diamondsuit}}
-  \newtheorem*{demonstration}{Démonstration}
-}
 
-\newcommand\contFrac[1]{\ensuremath{ \StrSubstitute{#1}{//}{+\cfrac{1}}}}
 
 %\lstnewenvironment{ocaml}{\lstset{language=(Objective)Caml}}{}
 
@@ -113,8 +90,7 @@ stockée de façon binaire soit $0$ soit $1$, mais au contraire comme
 superposition de ces deux composantes. On peut donc représenter un qubit
 $\ket \varphi$ par un vecteur de $\C^2$ :
 \[ \ket \varphi = a \cdot \ket 0 + b \cdot \ket 1 \text{ avec } a,b\in\C \text{
-et } \abs a
-^2 + \abs b ^2 = 1 \]
+et } \abs a ^2 + \abs b ^2 = 1 \]
 où, en utilisant la notation de Paul \textsc{Dirac} : le \emph{ket}, $\ket 0$ et
 $\ket 1$ forment une base de $\C^2$, et correspondent aux deux états possibles. 
 
@@ -360,10 +336,17 @@ Cette même égalité donne de même la réciproque. D'où le résultat.
 %\input{../output/shor_8_15.tex}\\
 %\input{../output/shor_7_99.tex} (143,7)
 \begin{figure}
+  \input{../output/shor_7_15.tex}
 %  \input{../output/shor_13_289.tex}
-  \caption{État du registre après une transformée de Fourier pour $n = 289$ et
-$p = 13$}
+  \caption{État du registre après une transformée de \textsc{Fourier} pour $n =
+289$ et $p = 13$}
 \end{figure}
+\begin{figure}
+% \input{../output/shor_67_1001.tex}
+ \caption{État du registre après une transformée de \textsc{Fourier} pour le
+couple $(67,1001)$}
+\end{figure}
+
 %\input{../output/shor_17_1001.tex}
 
 \appendix

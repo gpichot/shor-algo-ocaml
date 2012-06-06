@@ -17,9 +17,8 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage[french]{babel}
-\usepackage{braket}
+
 \usepackage{fancybox}
-\usepackage{xstring}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsfonts}
@@ -41,6 +40,24 @@
   \begin{center}
     \includegraphics[scale=0.12]{rosace.png}
   \end{center}
+}
+
+
+{
+  \theoremstyle{plain}
+  \theoremseparator{.}
+  \theoremprework{\medskip\hrule\medskip}
+  \theorempostwork{\hrule\bigskip}
+  \theorembodyfont{\sffamily}
+  \newtheorem*{definition}{Définition}
+  \theoremprework{\medskip\hrule\medskip}
+  \theorempostwork{\hrule\bigskip}
+  \newtheorem*{propriete}{Propriété}
+}
+{
+  \theorembodyfont{\normalfont}
+  \theoremsymbol{\ensuremath{\diamondsuit}}
+  \newtheorem*{demonstration}{Démonstration}
 }
 
 \newcommand\@ptsize{}

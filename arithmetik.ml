@@ -23,10 +23,21 @@ let primeTest n =
   done;
   not !isNotPrime
 (* }}} *)
-(* primePowTest {{{1 @TODO
- * Teste si l'entier n passé en argument n'est pas la puissance d'un nombre
- * premier *)
-let primePowTest n = false
+(* primePowerTest {{{1 
+ * Teste si l'entier n passé en argument n'est pas la puissance d'un nombre *)
+let primePowerTest n = 
+  let nb = [|3;5;7;11;13;17;19;23;29;31|] in
+  let isPrimePower = ref false in
+  let i = ref 0 in
+  while not !isPrimePower && !i < Array.length nb - 1 do
+    let m = ref nb.(!i) in
+    while not !isPrimePower && !m <= n do
+      if !m = n then isPrimePower := true;
+      m := !m * nb.(!i)
+    done;
+    incr i;
+  done;
+  !isPrimePower
 (* }}} *)
 (* Pgcd {{{1 *)
 let rec pgcd a b = match b with 
@@ -82,7 +93,7 @@ let rec nb_bits = function
   | n -> 1 + (nb_bits (n lsr 1))
 
 let order ~texPrint p n = 
-  log "\n---- Recherche de l'ordre de %i dans %i ----\n" p n; 
+  debug "\n---- Recherche de l'ordre de %i dans %i ----\n" p n; 
   let l = getQ n in
   let q = pow 2 l in
   debug "On trouve q = %i = 2 ^ %i.\n" q l;
@@ -92,7 +103,7 @@ let order ~texPrint p n =
     (reg1#size()) (reg2#size());
   (* On met le premier registre dans un état de superposition uniforme *)
   reg1#setUniformSuperposition q;
-  (* On calcule x ^ a mod n pour tous les a, on doit cependant
+  (* On calcule p ^ a mod n pour tous les a, on doit cependant
    * penser à les conserver (ce que ne peut pas faire un calculateur 
    * quantique) pour les "superposer" avec le premier registre ensuite. *)
   let expModTemp = Array.make n Complex.zero in
@@ -109,13 +120,14 @@ let order ~texPrint p n =
   let value = reg2#measureState () in
   (* On doit répercuter cette mesure sur le premier registre *)
   for a = 0 to q - 1 do
-    reg1#setStateProbability a (if sauvExpMod.(a) = value then Complex.one else Complex.zero)
+    let new_val = (if sauvExpMod.(a) = value then Complex.one else Complex.zero) in
+    reg1#setStateProbability a new_val
   done;
   (* Et on oublie pas de normaliser *)
   reg1#normalize ();
   (* Maintenant on applique la transformée de Fourier *)
   debug "Transformée de Fourier.\n"; 
-  reg1#fft (); (* ou reg1#dft q() mais moins performant :) *)
+  reg1#fft (); 
   debug "Fin de la transformée de Fourier.\n";
   reg1#normalize ();
   (* Si on doit afficher le résultat de la transformée de Fourier *)
@@ -128,6 +140,6 @@ let order ~texPrint p n =
   let (d,r) = approx s (float_of_int q) in
   debug "---- Un ordre possible est donc %i. ----\n" r;
   r
-  
+
 
 (* }}} *)
